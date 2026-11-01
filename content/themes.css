@@ -1,0 +1,128 @@
+/* Clearbook Themes
+ *
+ * IMPORTANT: Facebook layers many transparent, absolutely-positioned divs
+ * over images, video and the feed. Never set backgrounds on generic
+ * elements (div, section, ...) — it paints over the whole page. Instead,
+ * themes override Facebook's own CSS colour variables, which is what its
+ * built-in dark mode does. Facebook re-declares these variables on nested
+ * .__fb-light-mode / .__fb-dark-mode elements, hence those selectors.
+ */
+
+/* Base: anything Clearbook marks is hidden */
+[data-clearbook-hidden]:not([data-clearbook-collapsed]) {
+  display: none !important;
+}
+
+/* With "Show Hidden Post Markers" on, hidden feed posts collapse to a thin
+ * labelled bar instead (clipped, contents invisible). */
+[data-clearbook-collapsed] {
+  display: block !important;
+  position: relative !important;
+  height: 28px !important;
+  min-height: 0 !important;
+  max-height: 28px !important;
+  overflow: hidden !important;
+  margin-bottom: 8px !important;
+}
+
+[data-clearbook-collapsed] > * {
+  visibility: hidden !important;
+}
+
+[data-clearbook-collapsed]::before {
+  content: "Hidden by Clearbook: " attr(data-clearbook-hidden);
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  background: var(--card-background, #ffffff);
+  color: var(--secondary-text, #65676b);
+  font: 12px -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  visibility: visible;
+}
+
+/* Classic Facebook Theme - Keeps original colors */
+[data-clearbook-theme="classic"] {
+  /* No changes, just content filtering */
+}
+
+/* Minimal Theme - flatter, less visual clutter */
+[data-clearbook-theme="minimal"],
+[data-clearbook-theme="minimal"] .__fb-light-mode {
+  --card-corner-radius: 4px !important;
+  --shadow-1: none !important;
+  --shadow-2: none !important;
+}
+
+[data-clearbook-theme="minimal"] [aria-posinset] {
+  line-height: 1.6 !important;
+}
+
+/* Dark Theme */
+[data-clearbook-theme="dark"],
+[data-clearbook-theme="dark"] .__fb-light-mode,
+[data-clearbook-theme="dark"] .__fb-dark-mode {
+  color-scheme: dark;
+  --web-wash: #18191a !important;
+  --web-wrapper-background: #18191a !important;
+  --surface-background: #242526 !important;
+  --card-background: #242526 !important;
+  --nav-bar-background: #242526 !important;
+  --comment-background: #3a3b3c !important;
+  --secondary-button-background: #3a3b3c !important;
+  --input-background: #3a3b3c !important;
+  --primary-text: #e4e6eb !important;
+  --secondary-text: #b0b3b8 !important;
+  --placeholder-text: #b0b3b8 !important;
+  --primary-icon: #e4e6eb !important;
+  --secondary-icon: #b0b3b8 !important;
+  --divider: #3e4042 !important;
+  --media-inner-border: rgba(255, 255, 255, 0.05) !important;
+  --hover-overlay: rgba(255, 255, 255, 0.1) !important;
+  --blue-link: #4599ff !important;
+  --accent: #2d88ff !important;
+}
+
+[data-clearbook-theme="dark"] body {
+  background-color: #18191a !important;
+}
+
+/* Hacker News Theme - beige, orange accent, Verdana */
+[data-clearbook-theme="hackernews"],
+[data-clearbook-theme="hackernews"] .__fb-light-mode,
+[data-clearbook-theme="hackernews"] .__fb-dark-mode {
+  --web-wash: #f6f6ef !important;
+  --web-wrapper-background: #f6f6ef !important;
+  --surface-background: #f6f6ef !important;
+  --card-background: #f6f6ef !important;
+  --nav-bar-background: #ff6600 !important;
+  --comment-background: #eeeee4 !important;
+  --primary-text: #000000 !important;
+  --secondary-text: #828282 !important;
+  --divider: #ff6600 !important;
+  --blue-link: #000000 !important;
+  --accent: #ff6600 !important;
+  --card-corner-radius: 0 !important;
+  --shadow-1: none !important;
+  --shadow-2: none !important;
+}
+
+[data-clearbook-theme="hackernews"] body {
+  background-color: #f6f6ef !important;
+  font-family: Verdana, Geneva, sans-serif !important;
+}
+
+[data-clearbook-theme="hackernews"] [aria-posinset] {
+  border: 1px solid #ff6600 !important;
+  border-radius: 0 !important;
+  line-height: 1.6 !important;
+}
+
+[data-clearbook-theme="hackernews"] img[role="img"],
+[data-clearbook-theme="hackernews"] video {
+  max-width: 600px !important;
+  height: auto !important;
+}

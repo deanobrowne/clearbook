@@ -1,0 +1,64 @@
+{
+  "manifest_version": 2,
+  "name": "Clearbook",
+  "version": "1.0.0",
+  "description": "Transform social networks into minimal, distraction-free feeds. Start with Facebook, expand to Reddit, X, and more.",
+  "author": "Your Name",
+
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "clearbook@example.com"
+    }
+  },
+
+  "icons": {
+    "48": "icons/icon-48.png",
+    "96": "icons/icon-96.png"
+  },
+
+  "permissions": [
+    "storage",
+    "webRequest",
+    "webRequestBlocking",
+    "*://*.facebook.com/*",
+    "*://*.reddit.com/*",
+    "*://*.twitter.com/*",
+    "*://*.x.com/*"
+  ],
+
+  "background": {
+    "scripts": ["background.js"]
+  },
+
+  "content_scripts": [
+    {
+      "matches": ["*://*.facebook.com/*"],
+      "js": [
+        "utils/constants.js",
+        "utils/storage.js",
+        "content/providers/facebook.js",
+        "content/content.js"
+      ],
+      "css": ["content/themes.css"],
+      "run_at": "document_start"
+    }
+  ],
+
+  "browser_action": {
+    "default_popup": "popup/popup.html",
+    "default_icon": {
+      "48": "icons/icon-48.png",
+      "96": "icons/icon-96.png"
+    },
+    "default_title": "Clearbook"
+  },
+
+  "options_ui": {
+    "page": "options/options.html",
+    "open_in_tab": true
+  },
+
+  "web_accessible_resources": [
+    "content/themes.css"
+  ]
+}

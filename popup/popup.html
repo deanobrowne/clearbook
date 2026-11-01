@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Clearbook</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>✨ Clearbook</h1>
+      <p class="subtitle">Minimal Social Feeds</p>
+    </header>
+
+    <section class="quick-toggles">
+      <h2>Quick Toggles</h2>
+      
+      <label class="toggle-item">
+        <input type="checkbox" id="hideAds" />
+        <span>Hide Ads</span>
+      </label>
+
+      <label class="toggle-item">
+        <input type="checkbox" id="hideSuggestedContent" />
+        <span>Hide Suggested Content</span>
+      </label>
+
+      <label class="toggle-item">
+        <input type="checkbox" id="hideReels" />
+        <span>Hide Reels</span>
+      </label>
+
+      <label class="toggle-item">
+        <input type="checkbox" id="hideMarketplace" />
+        <span>Hide Marketplace</span>
+      </label>
+
+      <label class="toggle-item">
+        <input type="checkbox" id="hideAISlop" />
+        <span>Hide AI Content</span>
+      </label>
+
+      <label class="toggle-item">
+        <input type="checkbox" id="friendsOnlyFeed" />
+        <span>Friends Only Feed</span>
+      </label>
+
+      <label class="toggle-item">
+        <input type="checkbox" id="chronologicalFeed" />
+        <span>Chronological Feed</span>
+      </label>
+
+      <label class="toggle-item">
+        <input type="checkbox" id="showHiddenPlaceholders" />
+        <span>Show Hidden Post Markers</span>
+      </label>
+    </section>
+
+    <section class="theme-selector">
+      <h2>Theme</h2>
+      <select id="themeSelect">
+        <option value="classic">Classic Facebook</option>
+        <option value="minimal">Minimal</option>
+        <option value="dark">Dark</option>
+        <option value="hackernews">Hacker News</option>
+      </select>
+    </section>
+
+    <section class="actions">
+      <button id="openSettings" class="button button-primary">
+        ⚙️ All Settings
+      </button>
+      <button id="refreshPage" class="button button-secondary">
+        🔄 Refresh Page
+      </button>
+    </section>
+
+    <footer>
+      <p class="status" id="status">Settings saved</p>
+    </footer>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>

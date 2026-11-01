@@ -1,0 +1,26 @@
+# Build artifacts
+*.xpi
+*.zip
+
+# Development
+.DS_Store
+*.log
+*.swp
+*.swo
+*~
+
+# IDE
+.vscode/
+.idea/
+*.sublime-*
+
+# Node (if ever needed)
+node_modules/
+package-lock.json
+
+# Temporary files
+*.tmp
+.tmp/
+
+# Web extension artifacts
+web-ext-artifacts/
