@@ -50,15 +50,13 @@ browser.runtime.onInstalled.addListener(async (details) => {
   }
 });
 
-// Block ad requests at the network level
+// Block ad/tracking requests at the network level. Only URLs covered by the
+// manifest's host permissions (facebook.com) can be blocked; patterns for
+// other domains would never fire, so don't add them without a permission.
 const adUrlPatterns = [
   '*://www.facebook.com/ads/*',
   '*://www.facebook.com/tr*',
-  '*://connect.facebook.net/*/fbevents.js*',
   '*://www.facebook.com/ajax/bz*',
-  '*://*.doubleclick.net/*',
-  '*://*.googlesyndication.com/*',
-  '*://*.google-analytics.com/*',
 ];
 
 // Set to false to turn off network-level blocking (e.g. to measure whether

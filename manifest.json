@@ -20,10 +20,7 @@
     "storage",
     "webRequest",
     "webRequestBlocking",
-    "*://*.facebook.com/*",
-    "*://*.reddit.com/*",
-    "*://*.twitter.com/*",
-    "*://*.x.com/*"
+    "*://*.facebook.com/*"
   ],
 
   "background": {
