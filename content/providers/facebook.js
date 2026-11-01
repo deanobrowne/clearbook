@@ -103,7 +103,7 @@ const FacebookProvider = {
   async init(settings) {
     this.applySettings(settings);
     // Before the page renders, so the home feed isn't loaded for nothing.
-    this.maybeRedirectToFriendsFeed();
+    this.maybeRedirectFeed();
     await whenBodyReady();
     this.startObserving();
     this.scheduleClean();
@@ -133,7 +133,7 @@ const FacebookProvider = {
       // watch for URL changes here too.
       if (location.href !== this.lastUrl) {
         this.lastUrl = location.href;
-        this.maybeRedirectToFriendsFeed();
+        this.maybeRedirectFeed();
       }
       for (const m of mutations) {
         this.pendingTargets.add(m.target);
@@ -353,6 +353,7 @@ const FacebookProvider = {
     if ((ps.hideSponsored || s.hideAds) &&
         (hasMarker(this.markers.sponsored) || hasLabel(this.labels.sponsored) ||
          this.hasReferencedText(unit, this.labels.sponsoredReferenced) ||
+         this.hasScrambledLabel(unit, this.labels.sponsoredReferenced, thorough) ||
          (thorough && this.hasObfuscatedText(unit, this.labels.sponsored)))) {
       return 'sponsored';
     }
@@ -417,6 +418,32 @@ const FacebookProvider = {
     }
     for (const use of unit.querySelectorAll('use')) {
       if (matches(resolveUseChain(use))) return true;
+    }
+    return false;
+  },
+
+  // Trick 3: the label's letters are mixed with dozens of decoy letters,
+  // one per span. Decoys are pushed out of view (position:absolute;
+  // top:3em, clipped), and the real letters are reordered visually.
+  // Seen: 60 letter spans of which only "d" and "A" were in flow ("Ad").
+  // Keep the in-flow letters and compare them order-independently. The
+  // quick pass reads inline styles only (no style recalc); the thorough
+  // pass uses computed style in case the hiding moves into a CSS class.
+  hasScrambledLabel(unit, list, thorough) {
+    const wantedKeys = list.map(l => letterKey(normalizeLabel(l)));
+    for (const span of unit.querySelectorAll('span')) {
+      if (span.childElementCount < MIN_SCRAMBLE_LETTERS) continue;
+      let letters = '';
+      let isScramble = true;
+      for (const piece of span.children) {
+        const t = stripInvisible(piece.textContent || '');
+        if (t.length > 1) { isScramble = false; break; }
+        const pos = thorough ? getComputedStyle(piece).position : piece.style.position;
+        if (pos !== 'absolute' && pos !== 'fixed') letters += t;
+      }
+      if (!isScramble) continue;
+      const key = letterKey(normalizeLabel(letters));
+      if (key && wantedKeys.includes(key)) return true;
     }
     return false;
   },
@@ -516,22 +543,30 @@ const FacebookProvider = {
     el.setAttribute('data-clearbook-hidden', reason);
   },
 
-  // With "Friends Only Feed" on, send the home feed to Facebook's own
-  // friends feed. It only loads friends' posts, so there's far less to hide
-  // and the feed doesn't keep running dry while Clearbook filters it.
-  maybeRedirectToFriendsFeed() {
-    if (!this.settings.friendsOnlyFeed || !this.providerSettings.enabled) return;
+  // Send the plain home feed to one of Facebook's own feeds:
+  // - "Friends Only Feed": the friends feed. It only loads friends' posts,
+  //   so there's far less to hide and the feed doesn't keep running dry.
+  // - "Chronological Feed" (without friends-only): the newest-first feed.
+  // Only the plain home feed is redirected; feed tabs the user picked
+  // themselves (any `filter`/`sk` parameter) are left alone.
+  maybeRedirectFeed() {
+    if (!this.providerSettings.enabled) return;
+    const target = this.settings.friendsOnlyFeed ? FRIENDS_FEED_PATH
+      : this.settings.chronologicalFeed ? CHRONOLOGICAL_FEED_PATH
+      : null;
+    if (!target) return;
     const { pathname, search } = window.location;
     if (pathname !== '/' && pathname !== '/home.php') return;
-    if (new URLSearchParams(search).get('filter') === 'friends') return;
+    const params = new URLSearchParams(search);
+    if (params.has('filter') || params.has('sk')) return;
     // Loop guard: if Facebook bounced us back to the plain home feed right
-    // after a redirect (e.g. it changed the friends feed URL), don't retry
-    // for a while; the regular friends-only filtering still applies.
-    const key = 'clearbook-friends-redirect';
+    // after a redirect (e.g. it changed these URLs), don't retry for a
+    // while; the regular filtering still applies.
+    const key = 'clearbook-feed-redirect';
     const last = Number(sessionStorage.getItem(key) || 0);
-    if (Date.now() - last < FRIENDS_REDIRECT_COOLDOWN_MS) return;
+    if (Date.now() - last < FEED_REDIRECT_COOLDOWN_MS) return;
     sessionStorage.setItem(key, String(Date.now()));
-    window.location.replace(FRIENDS_FEED_PATH);
+    window.location.replace(target);
   },
 
   // Unhide everything so changed settings take effect both ways.
@@ -549,7 +584,7 @@ const FacebookProvider = {
 
   updateSettings(newSettings) {
     this.applySettings(newSettings);
-    this.maybeRedirectToFriendsFeed();
+    this.maybeRedirectFeed();
     if (!document.body) return;
     this.resetHidden();
     // Re-hide quickly with the cheap checks, then do a thorough sweep.
@@ -564,9 +599,11 @@ const FacebookProvider = {
   }
 };
 
-// Facebook's own friends-only feed (newest first).
+// Facebook's own feeds: friends only (newest first), and everything newest
+// first. `sk=h_chr` is Facebook's "most recent" feed key.
 const FRIENDS_FEED_PATH = '/?filter=friends&sk=h_chr';
-const FRIENDS_REDIRECT_COOLDOWN_MS = 10000;
+const CHRONOLOGICAL_FEED_PATH = '/?sk=h_chr';
+const FEED_REDIRECT_COOLDOWN_MS = 10000;
 
 // Fast pass budget per animation frame, and minimum time between fast
 // re-checks of the same post while Facebook is still filling it in.
@@ -585,6 +622,16 @@ function whenIdle(fn) {
   } else {
     setTimeout(() => fn({ timeRemaining: () => 8, didTimeout: true }), 50);
   }
+}
+
+// An element with at least this many single-character children is treated
+// as a letter scramble (seen: 60).
+const MIN_SCRAMBLE_LETTERS = 10;
+
+// Remove zero-width/joiner characters Facebook pads scrambled letters with
+// (seen: U+034F COMBINING GRAPHEME JOINER after every letter).
+function stripInvisible(text) {
+  return text.replace(/[\u034f\u200b-\u200d\u2060\ufeff]/g, '');
 }
 
 // Lower-case letters only, so "Spon-so-red" / "S p o n s o r e d" match.
