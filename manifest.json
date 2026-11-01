@@ -3,11 +3,11 @@
   "name": "Clearbook",
   "version": "1.0.0",
   "description": "Transform social networks into minimal, distraction-free feeds. Start with Facebook, expand to Reddit, X, and more.",
-  "author": "Your Name",
+  "author": "Dean Browne",
 
   "browser_specific_settings": {
     "gecko": {
-      "id": "clearbook@example.com"
+      "id": "clearbook@deanobrowne"
     }
   },
 
